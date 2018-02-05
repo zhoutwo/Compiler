@@ -38,33 +38,33 @@
                     [else (error `type-check-R4 "`and` expects a Booleans: ~a" e)])]
 
            [`(if ,(app (type-check-R4 env) e-cnd t-cnd) ,(app (type-check-R4 env) e-thn t-thn) ,(app (type-check-R4 env) e-els t-els))
-             (if (eq? 'Boolean t-cnd)
-               (if (eq?  t-thn t-els)
+             (if (equal? 'Boolean t-cnd)
+               (if (equal? t-thn t-els)
                  (values `(has-type (if ,e-cnd ,e-thn ,e-els) ,t-thn) t-thn)
                  (error `type-check-R4 "'if' expects 'then' and 'else' to be the same type: ~a" e))
                (error `type-check-R4 "'if' expects condition to be Boolean: ~a" e))]
            [`(- ,(app (type-check-R4 env) e t))
-             (if (eq? 'Integer t)
+             (if (equal? 'Integer t)
                (values `(has-type (- ,e) Integer) 'Integer)
                (error 'type-check-R4 "`-` expects an Integers: ~a" e))]
            [`(+ ,(app (type-check-R4 env) e1 t1) ,(app (type-check-R4 env) e2 t2))
-             (if (and (eq? 'Integer t1) (eq? 'Integer t2))
+             (if (and (equal? 'Integer t1) (equal? 'Integer t2))
                (values `(has-type (+ ,e1 ,e2) Integer) 'Integer)
                (error 'type-check-R4 "'+' expects two Integers: ~a" e))]
            [`(> ,(app (type-check-R4 env) e1 t1) ,(app (type-check-R4 env) e2 t2))
-             (if (and (eq? 'Integer t1) (eq? 'Integer t2))
+             (if (and (equal? 'Integer t1) (equal? 'Integer t2))
                (values `(has-type (> ,e1 ,e2) Boolean) 'Boolean)
                (error 'type-check-R4 "'>' expects two Integers: ~a" e))]
            [`(>= ,(app (type-check-R4 env) e1 t1) ,(app (type-check-R4 env) e2 t2))
-             (if (and (eq? 'Integer t1) (eq? 'Integer t2))
+             (if (and (equal? 'Integer t1) (equal? 'Integer t2))
                (values `(has-type (>= ,e1 ,e2) Boolean) 'Boolean)
                (error 'type-check-R4 "'>=' expects two Integers: ~a" e))]
            [`(< ,(app (type-check-R4 env) e1 t1) ,(app (type-check-R4 env) e2 t2))
-             (if (and (eq? 'Integer t1) (eq? 'Integer t2))
+             (if (and (equal? 'Integer t1) (equal? 'Integer t2))
                (values `(has-type (< ,e1 ,e2) Boolean) 'Boolean)
                (error 'type-check-R4 "'<' expects two Integers: ~a" e))]
            [`(<= ,(app (type-check-R4 env) e1 t1) ,(app (type-check-R4 env) e2 t2))
-             (if (and (eq? 'Integer t1) (eq? 'Integer t2))
+             (if (and (equal? 'Integer t1) (equal? 'Integer t2))
                (values `(has-type (<= ,e1 ,e2) Boolean) 'Boolean)
                (error 'type-check-R4 "'<=' expects two Integers: ~a" e))]
            [`(read)
@@ -104,7 +104,7 @@
                      [(`(Vector ,ts1 ...) `(Vector ,ts2 ...))
                       (values `(has-type (eq? ,e1 ,e2) Boolean) 'Boolean)]
                      [(other wise) 
-                       (if (eq? t1 t2) 
+                       (if (equal? t1 t2)
                          (values `(has-type (eq? ,e1 ,e2) Boolean) 'Boolean)
                          (error `type-check "`eq?` expects two Integers or two Booleans: ~a" e))])]
            [`(program ,ds ... ,body)
@@ -138,7 +138,7 @@
                             (loop (cdr ftype) (cdr les) (cdr lts))
                             (error `type-check "Argument type mismatch: ~a ~a ~a" (car ftype) (car les) e))]
                       [else
-                        (values `(has-type ,funce ,@es ,(cadr ftype))
+                        (values `(has-type (,funce ,@es) ,(cadr ftype))
                                 (cadr ftype))]))]
            [`(,op ,(app (type-check-R4 env) e1 t1) ,(app (type-check-R4 env) e2 t2))
              (if (and (eq? 'Integer t1) (eq? 'Integer t2))
