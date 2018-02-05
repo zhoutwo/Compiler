@@ -2,35 +2,22 @@
 (require "../utilities.rkt")
 
 (provide type-check)
-(require racket/trace)
+
 (define (type-check-R4 env)
-  (trace-lambda (e)
-    (pretty-print 'aaaaa)
-    (pretty-print e)
+  (lambda (e)
     (match e
            [(? fixnum?) (values `(has-type ,e Integer) 'Integer)]
            [(? boolean?) (values `(has-type ,e Boolean) 'Boolean)]
            [(? symbol?) (values `(has-type ,e ,(lookup e env)) (lookup e env))]
            [`(define (,f [,xs : ,ps] ...) : ,rt ,body)
-              (pretty-print xs)
-              (pretty-print ps)
               (define newenv (let loop ([xs xs]
                                    [ps ps]
                                    [renv '()])
                                    (if (null? xs)
                                      (append renv env)
                                      (loop (cdr xs) (cdr ps) (cons (cons (car xs) (car ps)) renv)))))
-              (pretty-print 'bbbbb)
-              (pretty-print body)
-              (pretty-print "before check")
-              (pretty-print env)
-              (pretty-print newenv)
               (define-values (e-body t-body) ((type-check-R4 newenv) body))
-              (pretty-print "before construct")
               (define newe (cons (car e) (cons (cadr e) (cons (caddr e) (cons (cadddr e) (list e-body))))))
-              (pretty-print "after construct")
-              (pretty-print newe)
-              (pretty-print e)
               (if (equal? rt t-body)
                   (values newe
                           `(,@ps -> ,rt))
@@ -106,15 +93,11 @@
                          (values `(has-type (eq? ,e1 ,e2) Boolean) 'Boolean)
                          (error `type-check "`eq?` expects two Integers or two Booleans: ~a" e))])]
            [`(program ,ds ... ,body)
-             (pretty-print "top-level")
              (define fname-types (map (lambda (d)
                                           (match d
                                             [`(define (,f [,xs : ,ps] ...) : ,rt ,body)
                                                 (cons (caadr d)`(,@ps -> ,rt))])) ds))
              (set! env (append fname-types env))
-             (pretty-print "afterset!")
-             (pretty-print env)
-             (pretty-print fname-types)
              (define ds-e (let loop ([ds ds]
                         [ds-e '()])
                (if (null? ds)
@@ -122,15 +105,10 @@
                    (let-values ([(e-body t-body) ((type-check-R4 env) (car ds))]
                                 [(func-name) (caadr (car ds))])
                      (loop (cdr ds) (append ds-e `(,e-body)))))))
-             (pretty-print "afterloop")
-             (pretty-print env)
              (define-values (e-body t-body) ((type-check-R4 env) body))
              `(program (type ,t-body) ,ds-e ,e-body)]
            [`(,op ,(app (type-check-R4 env) es ts) ...)
              (define-values (funce functype) ((type-check-R4 env) op))
-             (pretty-print 'functype)
-             (pretty-print functype)
-             (pretty-print env)
              (let loop ([ftype functype]
                         [les es]
                         [lts ts])
@@ -152,7 +130,7 @@
                (values `(has-type (,op ,e1 ,e2) `Boolean) 'Boolean)
                (error `type-check-R4 (string-append (symbol->string op) " expects two Integers: ~a ~a ~a") e t1 t2))]
            )))
-;(trace type-check-R4)
+
 (define type-check
   (lambda (e)
   ((type-check-R4 '()) e)))
