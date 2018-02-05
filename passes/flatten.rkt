@@ -73,9 +73,9 @@
                                 (append stms1 stms2 stms3 (list (list `assign newExp `(,op ,prevExp1 ,prevExp2 ,prevExp3)))) 
                                 (cons (cons newExp t) (append vars1 vars2 vars3))))]
                     )]
-           [`(program ,type ,e)
+           [`(program ,type ,defs ,e)
              (define-values (newExp stms vars) (flatten-helper e))
-             (values (list) `(program ,(remove-duplicates vars) ,type ,(append stms (list (list `return newExp)))) (list))
+             (values (list) `(program ,(remove-duplicates vars) ,type ,defs ,(append stms (list (list `return newExp)))) (list))
              ]
            )))
 

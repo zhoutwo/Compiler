@@ -28,4 +28,4 @@
 (define patch-instructions
   (lambda (p)
     (match p
-           [`(program ,maxn ,type ,stms) `(program ,maxn ,type ,(apply append (map patch-instructions-stms stms)))])))
+           [`(program ,maxn ,type ,defs ,stms) `(program ,maxn ,type ,defs ,(apply append (map patch-instructions-stms stms)))])))

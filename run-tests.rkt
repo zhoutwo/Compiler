@@ -2,10 +2,13 @@
 #lang racket
 
 (require "utilities.rkt")
-(require "interp.rkt")
 (require "compiler.rkt")
+(require "passes/type-check.rkt")
 
-;; (debug-level 4)
+(debug-level 4)
 
-(interp-tests "integers and arithmetic" #f r0-passes interp-scheme "r0" (range 1 5))
-(display "tests passed!") (newline)
+(compiler-tests "compiler.rkt" type-check r4-passes "r0" (make-list 4))
+(compiler-tests "compiler.rkt" type-check r4-passes "r1" (make-list 48))
+(compiler-tests "compiler.rkt" type-check r4-passes "r2" (make-list 59))
+(compiler-tests "compiler.rkt" type-check r4-passes "r3" (make-list 35))
+(newline) (display "tests passed!") (newline)

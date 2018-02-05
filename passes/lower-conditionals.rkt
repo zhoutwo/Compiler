@@ -5,8 +5,8 @@
 (define lower-conditionals
   (lambda (e)
     (match e
-           [`(program ,maxn ,type ,stms)
-             `(program ,maxn ,type ,(lower-conditionals-stms stms))])))
+           [`(program ,maxn ,type ,defs ,stms)
+             `(program ,maxn ,type ,defs ,(lower-conditionals-stms stms))])))
 
 (define lower-conditionals-stms
   (lambda (stms)

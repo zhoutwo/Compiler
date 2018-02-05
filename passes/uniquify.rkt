@@ -17,8 +17,8 @@
                       `(has-type (,op ,@(map (uniquify-helper alist) es)) ,t)]
                     [`(read)
                       `(has-type (read) ,t)])]
-           [`(program ,type ,e)
-             `(program ,type ,((uniquify-helper alist) e))]
+           [`(program ,type ,defs ,e)
+             `(program ,type ,defs ,((uniquify-helper alist) e))]
            )))
 
 (define uniquify

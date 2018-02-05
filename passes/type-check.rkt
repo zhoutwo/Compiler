@@ -1,6 +1,5 @@
 #lang racket
 (require "../utilities.rkt")
-
 (provide type-check)
 
 (define (type-check-R4 env)
@@ -52,6 +51,22 @@
              (if (and (eq? 'Integer t1) (eq? 'Integer t2))
                (values `(has-type (+ ,e1 ,e2) Integer) 'Integer)
                (error 'type-check-R4 "'+' expects two Integers: ~a" e))]
+           [`(> ,(app (type-check-R4 env) e1 t1) ,(app (type-check-R4 env) e2 t2))
+             (if (and (eq? 'Integer t1) (eq? 'Integer t2))
+               (values `(has-type (> ,e1 ,e2) Boolean) 'Boolean)
+               (error 'type-check-R4 "'>' expects two Integers: ~a" e))]
+           [`(>= ,(app (type-check-R4 env) e1 t1) ,(app (type-check-R4 env) e2 t2))
+             (if (and (eq? 'Integer t1) (eq? 'Integer t2))
+               (values `(has-type (>= ,e1 ,e2) Boolean) 'Boolean)
+               (error 'type-check-R4 "'>=' expects two Integers: ~a" e))]
+           [`(< ,(app (type-check-R4 env) e1 t1) ,(app (type-check-R4 env) e2 t2))
+             (if (and (eq? 'Integer t1) (eq? 'Integer t2))
+               (values `(has-type (< ,e1 ,e2) Boolean) 'Boolean)
+               (error 'type-check-R4 "'<' expects two Integers: ~a" e))]
+           [`(<= ,(app (type-check-R4 env) e1 t1) ,(app (type-check-R4 env) e2 t2))
+             (if (and (eq? 'Integer t1) (eq? 'Integer t2))
+               (values `(has-type (<= ,e1 ,e2) Boolean) 'Boolean)
+               (error 'type-check-R4 "'<=' expects two Integers: ~a" e))]
            [`(read)
                (values `(has-type (read) 'Integer) 'Integer)]
            [`(void) (values `(has-type (void) Void) `Void)]

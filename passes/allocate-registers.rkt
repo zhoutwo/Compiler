@@ -79,7 +79,7 @@
 (define allocate-registers 
   (lambda (program)
     (match program
-           [`(program (,vars ,graph ,type) ,stms)
+           [`(program (,vars ,graph ,type) ,defs ,stms)
              (let* ([alist (color-graph-convert (color-graph graph (map car vars)))]
                     [max (apply max (append '(0) (map cadr alist)))]
                     [maxn (* 16 max)]
@@ -99,5 +99,5 @@
                                         rspillslst
                                         (cons `(,(car vecs) . ,(lookup (car (lookup (car vecs) alist)) color-to-spillloc))
                                           (loop (cdr vecs) rspillslst))))])
-                    `(program (,maxn ,rspills) ,type ,(allocate-registers-insts stms alist var-types rspillslst)))]
+                    `(program (,maxn ,rspills) ,type ,defs ,(allocate-registers-insts stms alist var-types rspillslst)))]
            )))

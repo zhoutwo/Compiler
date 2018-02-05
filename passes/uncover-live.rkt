@@ -61,14 +61,10 @@
 
 (define (uncover-live-helper e ls)
   (match e
-    [`(program ,var-types (type ,t) ,es)
+    [`(program ,var-types (type ,t) ,defs ,es)
         (begin
           (define-values (lives ees) (uncover-live-helper es ls))
-          `(program (,var-types ,(cdr lives) (type ,t)) ,(reverse ees)))]
-    [`(program ,var-types (type ,t) ,es ...)
-          (begin
-              (define-values (lives ees) (uncover-live-helper es ls))
-              `(program (,var-types ,(cdr lives) (type ,t)) ,@(reverse ees)))]
+          `(program (,var-types ,(cdr lives) (type ,t)) ,defs ,(reverse ees)))]
     [else
       (let loop ([es (reverse e)]
                  [ls ls])

@@ -58,7 +58,7 @@
 (define print-x86
   (lambda (p)
     (match p
-           [`(program (,size ,rspills) (type ,type) ,stms)
+           [`(program (,size ,rspills) (type ,type) ,defs ,stms)
     (string-append
       (string-append* 
         ".global " (if mac? "_" "") "main" "\n" 

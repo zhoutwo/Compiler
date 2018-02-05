@@ -1,11 +1,13 @@
-#lang racket (require "../utilities.rkt")
+#lang racket
+(require "../utilities.rkt")
 (provide expose-allocation)
 
 (define expose-allocation
   (lambda (e)
     (match e
-           [`(program ,type ,body)
-             `(program ,type ,(expose-allocation body))]
+           [`(program ,type ,defs ,body)
+             `(program ,type ,(map (lambda (def) (expose-allocation def)) defs) ,(expose-allocation body))]
+           ;[]
            [`(has-type (vector ,es ...) ,types) 
              (expose-allocation-helper es '() types 0 (gensym "alloc"))]
            [`(has-type (let ([,x ,exp]) ,body) ,t)

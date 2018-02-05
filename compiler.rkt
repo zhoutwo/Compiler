@@ -1,10 +1,11 @@
 #lang racket
 (require "utilities.rkt")
 (require "interp.rkt")
-(provide r3-passes)
+(provide r4-passes)
 
 (require "passes/type-check.rkt")
 (require "passes/uniquify.rkt")
+(require "passes/reveal-functions.rkt")
 (require "passes/expose-allocation.rkt")
 (require "passes/flatten.rkt")
 (require "passes/select-instructions.rkt")
@@ -33,9 +34,10 @@
   (lambda (e)
     (build-interference (uncover-live (select-instructions (flatten (expose-allocation (uniquify (type-check e)))))))))
 
-(define r3-passes
+(define r4-passes
   `(("uniquify" ,uniquify ,null)
     ("expose-allocation" ,expose-allocation ,null)
+    ("reveal-functions" ,reveal-functions ,null)
     ("flatten" ,flatten ,null)
     ("select-instructions" ,select-instructions ,null)
     ("uncover-live" ,uncover-live ,null)

@@ -112,4 +112,4 @@
 (define select-instructions
   (lambda (p)
     (match p
-           [`(program ,vars ,type ,stms) `(program ,vars ,type ,(select-intr-stms stms))] )))
+           [`(program ,vars ,type ,defs ,stms) `(program ,vars ,type ,defs ,(select-intr-stms stms))] )))
