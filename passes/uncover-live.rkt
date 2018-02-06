@@ -61,10 +61,15 @@
 
 (define (uncover-live-helper e ls)
   (match e
-    [`(program ,var-types (type ,t) ,defs ,es)
+    [`(program (,var-types ,num-vars) (type ,t) (defines ,defs ...) ,es)
         (begin
           (define-values (lives ees) (uncover-live-helper es ls))
-          `(program (,var-types ,(cdr lives) (type ,t)) ,defs ,(reverse ees)))]
+          (define-values (deflives defees) (map2 (lambda (def) (uncover-live-helper def ls)) defs))
+          `(program (,var-types ,(cdr lives) (type ,t)) (defines ,@defees) ,(reverse ees)))]
+    [`(define (,f) ,numParams (,var ,maxStack) ,instrs)
+        (begin
+          (define-values (lives ees) (uncover-live-helper instrs ls))
+          (values (cdr lives) `(define (,f) ,numParams (,var ,maxStack ,(cdr lives)) ,(reverse ees))))]
     [else
       (let loop ([es (reverse e)]
                  [ls ls])

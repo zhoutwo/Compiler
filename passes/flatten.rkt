@@ -80,7 +80,7 @@
                         (define-values (eExps eStms eVars) (map3 flatten-helper exps))
                         (let ([newExp (gensym "app")])
                           (values newExp
-                            `(,@opStms ,@(apply append eStms) (assign ,newExp (app opExp ,@eExps)))
+                            `(,@opStms ,@(apply append eStms) (assign ,newExp (app ,opExp ,@eExps)))
                             `(,(cons newExp t) ,@opVars ,@(apply append eVars))))])]
            [`(define (,f [,xs : ,ps] ...) : ,rt ,body)
                (define-values (newExp stms vars) (flatten-helper body))

@@ -1,7 +1,7 @@
 #lang racket
 (require "../utilities.rkt")
 (provide reveal-functions)
-(require racket/trace)
+
 (define (reveal-functions-helper fnames)
   (lambda (rawExp)
     (match rawExp

@@ -1,6 +1,6 @@
 #lang racket
 (require "../utilities.rkt")
-(require racket/trace)
+
 (provide build-interference)
 
 (define add-edges-helper
@@ -44,6 +44,20 @@
 (define build-interference
   (lambda (program)
     (match program
-           [`(program (,var-types ,live-afters ,type) ,defs ,stms)
-             (let ([vars (set-union (map car var-types) (set->list caller-save))])
-                  `(program ,(list var-types (helper live-afters stms (make-graph vars) var-types) type ) ,defs ,stms))])))
+           [`(define (,fs) ,numParams (,defvar-types ,maxStacks ,lives) ,ees)
+              (define alldefvars (map car defvar-types))
+               `(define (,fs) ,numParams (,defvar-types ,maxStacks ,(helper lives ees (make-graph alldefvars) defvar-types)) ,ees)]
+           [`(program (,var-types ,live-afters ,type) (defines ,defs ...) ,stms)
+               (define ndefs (map build-interference defs))
+               ;(define def-var-types (apply append defvar-types))
+               (define all-var-types var-types)
+               (define all-vars (set-union (map car all-var-types) (set->list caller-save)))
+               ;(define g (make-graph all-vars))
+               ;(set! g (helper live-afters stms g all-var-types))
+               ;(let loop ([lives lives]
+               ;           [ees ees])
+               ;           (if (null? lives)
+               ;               (void)
+               ;               (begin (set! g (helper (car lives) (car ees) g all-var-types))
+               ;                      (loop (cdr defvar-types) (cdr lives) (cdr ees)))))
+               `(program (,var-types ,(helper live-afters stms (make-graph all-vars) all-var-types) ,type) (defines ,@ndefs) ,stms)])))

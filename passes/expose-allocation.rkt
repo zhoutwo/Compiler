@@ -7,7 +7,6 @@
     (match e
            [`(program ,type ,defs ,body)
              `(program ,type ,(map (lambda (def) (expose-allocation def)) defs) ,(expose-allocation body))]
-           ;[]
            [`(has-type (vector ,es ...) ,types) 
              (expose-allocation-helper es '() types 0 (gensym "alloc"))]
            [`(has-type (let ([,x ,exp]) ,body) ,t)
@@ -26,7 +25,7 @@
     (define bytes (+ 8 (* 8 count)))
     (if (null? es)
       `(has-type (let ([,(gensym "collectret") (has-type (if 
-                                      (has-type (< (has-type (+ (has-type (global-value free_ptr)Integer) (has-type ,bytes Integer)) Integer) (has-type (global-value fromspace_end) Integer)) Boolean)
+                                      (has-type (< (has-type (+ (has-type (global-value free_ptr) Integer) (has-type ,bytes Integer)) Integer) (has-type (global-value fromspace_end) Integer)) Boolean)
                                       (has-type (void) Void)
                                       (has-type (collect 
                                                   (has-type ,bytes Integer)) Void))
