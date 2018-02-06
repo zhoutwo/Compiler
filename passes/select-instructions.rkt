@@ -38,6 +38,7 @@
                `((define (,f)
                          ,allargslength
                          (,allvars ,(if (< allargslength 6) 0 (- allargslength 6)))
+                         (,allargs ,storages)
                          (,@(map (lambda (as) `(movq ,(cdr as) ,(select-intr-arg (car as)))) allargs-storage)
                           ,@((select-intr-stms func-var-list func-var-storage) stmts)))
                  ,@((select-intr-stms func-var-list func-var-storage) (cdr stms)))]

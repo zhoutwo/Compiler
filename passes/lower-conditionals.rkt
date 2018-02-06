@@ -5,8 +5,10 @@
 (define lower-conditionals
   (lambda (e)
     (match e
-           [`(program ,maxn ,type ,defs ,stms)
-             `(program ,maxn ,type ,defs ,(lower-conditionals-stms stms))])))
+           [`(program ,maxn ,type (defines ,defs ...) ,stms)
+             `(program ,maxn ,type (defines ,@(map lower-conditionals defs)) ,(lower-conditionals-stms stms))]
+           [`(define (,f) ,numParam (,maxn ,rspills) (,arg-types ,storage-types) ,stms)
+             `(define (,f) ,numParam (,maxn ,rspills) (,arg-types ,storage-types) ,(lower-conditionals-stms stms))])))
 
 (define lower-conditionals-stms
   (lambda (stms)
@@ -15,7 +17,6 @@
              [`(if (eq? ,arg1 ,arg2) ,thn ,els)
                (let ([then-label (gensym "then")]
                      [end-label (gensym "end")])
-
                  (append 
                    `((cmpq ,arg2 ,arg1) 
                      (jmp-if e ,then-label))

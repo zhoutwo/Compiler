@@ -5,10 +5,10 @@
 
 (define add-edges-helper
   (lambda (d vs ignores graph var-types)
-    (let ([ign (remove null 
-                       (map (lambda (x) 
-                              (match x 
-                                     [`(var ,var) var] 
+    (let ([ign (remove null
+                       (map (lambda (x)
+                              (match x
+                                     [`(var ,var) var]
                                      [else null])) ignores))])
       (match d
              [`(var ,var)
@@ -25,7 +25,7 @@
 (define helper
   (lambda (live-after stms graph var-types)
     (if (null? stms) graph
-      (helper (cdr live-after) (cdr stms) 
+      (helper (cdr live-after) (cdr stms)
               (match (car stms)
                      [`(movq ,arg1 ,arg2)
                        (add-edges-helper arg2 (car live-after) (list arg1 arg2) graph var-types)]
@@ -44,13 +44,14 @@
 (define build-interference
   (lambda (program)
     (match program
-           [`(define (,fs) ,numParams (,defvar-types ,maxStacks ,lives) ,ees)
+           [`(define (,fs) ,numParams (,defvar-types ,maxStacks ,lives) (,arg-types ,storage-types) ,ees)
               (define alldefvars (map car defvar-types))
-               `(define (,fs) ,numParams (,defvar-types ,maxStacks ,(helper lives ees (make-graph alldefvars) defvar-types)) ,ees)]
+               `(define (,fs) ,numParams (,defvar-types ,maxStacks ,(helper lives ees (make-graph alldefvars) defvar-types)) (,arg-types ,storage-types) ,ees)]
            [`(program (,var-types ,live-afters ,type) (defines ,defs ...) ,stms)
                (define ndefs (map build-interference defs))
-               ;(define def-var-types (apply append defvar-types))
-               (define all-var-types var-types)
+               (define def-var-types (apply append (map (lambda (def)
+                                                              (cadr (cadr (cdddr def)))) defs)))
+               (define all-var-types (append var-types def-var-types))
                (define all-vars (set-union (map car all-var-types) (set->list caller-save)))
                ;(define g (make-graph all-vars))
                ;(set! g (helper live-afters stms g all-var-types))

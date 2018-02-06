@@ -5,6 +5,9 @@
 (define patch-instructions-stms
   (lambda (stms)
     (match stms
+         [`(leaq (function-ref ,f) (deref ,reg ,l))
+                     `((leaq (function-ref ,f) (reg rax))
+                       (movq (reg rax) (deref ,reg ,l)))]
          [`(movq (deref ,reg1 ,l1) (deref ,reg2 ,l2))
                      `((movq (deref ,reg1 ,l1) (reg rax))
                        (movq (reg rax) (deref ,reg2 ,l2)))]
@@ -28,4 +31,7 @@
 (define patch-instructions
   (lambda (p)
     (match p
-           [`(program ,maxn ,type ,defs ,stms) `(program ,maxn ,type ,defs ,(apply append (map patch-instructions-stms stms)))])))
+           [`(program ,maxn ,type (defines ,defs ...) ,stms)
+              `(program ,maxn ,type (defines ,@(map patch-instructions defs)) ,(apply append (map patch-instructions-stms stms)))]
+           [`(define (,f) ,numParam (,maxn ,rspills) (,arg-types ,storage-types) ,stms)
+              `(define (,f) ,numParam (,maxn ,rspills) (,arg-types ,storage-types) ,(apply append (map patch-instructions-stms stms)))])))

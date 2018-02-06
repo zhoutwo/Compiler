@@ -66,10 +66,10 @@
           (define-values (lives ees) (uncover-live-helper es ls))
           (define-values (deflives defees) (map2 (lambda (def) (uncover-live-helper def ls)) defs))
           `(program (,var-types ,(cdr lives) (type ,t)) (defines ,@defees) ,(reverse ees)))]
-    [`(define (,f) ,numParams (,var ,maxStack) ,instrs)
+    [`(define (,f) ,numParams (,var ,maxStack) (,arg-types ,storage-types) ,instrs)
         (begin
           (define-values (lives ees) (uncover-live-helper instrs ls))
-          (values (cdr lives) `(define (,f) ,numParams (,var ,maxStack ,(cdr lives)) ,(reverse ees))))]
+          (values (cdr lives) `(define (,f) ,numParams (,var ,maxStack ,(cdr lives)) (,arg-types ,storage-types) ,(reverse ees))))]
     [else
       (let loop ([es (reverse e)]
                  [ls ls])
