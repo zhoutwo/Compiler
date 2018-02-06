@@ -54,7 +54,7 @@
           [`(,op ,es ...)
             `(has-type (app ,((reveal-functions-helper fnames) op) ,@(map (reveal-functions-helper fnames) es)) ,t)])]
       [`(define (,f [,xs : ,ps] ...) : ,rt ,body)
-          `(define (,f [,xs : ,ps] ...) : ,rt ,((reveal-functions-helper fnames) body))])))
+          `(define ,(cadr rawExp) : ,rt ,((reveal-functions-helper fnames) body))])))
 
 (define reveal-functions
   (lambda (e)

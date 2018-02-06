@@ -10,18 +10,21 @@
                     [(? symbol?) (values exp null null)]
                     [(? integer?) (values exp null null)]
                     [(? boolean?) (values exp null null)]
+                    [`(function-ref ,fref)
+                      (let ([newExp (gensym fref)])
+                        (values newExp `((assign ,newExp ,exp)) `(,(cons newExp t))))]
                     [`(void) (values exp null null)]
                     [`(allocate ,count ,type)
                       (values exp null null)]
                     [`(collect ,(app flatten-helper newExp stms var))
                       (values `(collect ,newExp) null null)]
                     [`(global-value free_ptr) 
-                      (let ([newExp (gensym "tmp")])
+                      (let ([newExp (gensym "free_ptr")])
                         (values newExp 
                                 (list (list `assign newExp exp))
                                 (list (cons newExp 'Integer))))]
                     [`(global-value fromspace_end) 
-                      (let ([newExp (gensym "tmp")])
+                      (let ([newExp (gensym "fromspace_end")])
                         (values newExp 
                                 (list (list `assign newExp exp))
                                 (list (cons newExp 'Integer))))]
@@ -72,12 +75,30 @@
                         (values newExp 
                                 (append stms1 stms2 stms3 (list (list `assign newExp `(,op ,prevExp1 ,prevExp2 ,prevExp3)))) 
                                 (cons (cons newExp t) (append vars1 vars2 vars3))))]
-                    )]
-           [`(program ,type ,defs ,e)
-             (define-values (newExp stms vars) (flatten-helper e))
-             (values (list) `(program ,(remove-duplicates vars) ,type ,defs ,(append stms (list (list `return newExp)))) (list))
-             ]
-           )))
+                    [`(app ,op ,exps ...)
+                        (define-values (opExp opStms opVars) (flatten-helper op))
+                        (define-values (eExps eStms eVars) (map3 flatten-helper exps))
+                        (let ([newExp (gensym "app")])
+                          (values newExp
+                            `(,@opStms ,@(apply append eStms) (assign ,newExp (app opExp ,@eExps)))
+                            `(,(cons newExp t) ,@opVars ,@(apply append eVars))))])]
+           [`(define (,f [,xs : ,ps] ...) : ,rt ,body)
+               (define-values (newExp stms vars) (flatten-helper body))
+               (set! vars (remove-duplicates vars))
+               (define newStms `(define ,(cadr rawExp) : ,(cadddr rawExp) ,vars (,@stms (return ,newExp))))
+               (values `(,newExp) newStms vars)]
+           [`(program ,type (defines ,defs ...) ,e)
+               (define-values (newExp stms vars) (flatten-helper e))
+               (set! vars (remove-duplicates vars))
+               (define-values (newDefExps newDefStms newDefVars) (map3 flatten-helper defs))
+               ;(let loop ([defVars newDefVars])
+               ;   (if (null? defVars)
+               ;       (void)
+               ;       (begin
+               ;         (define newVars (set-union (list->set vars) (list->set (car defVars))))
+               ;         (set! vars (set->list newVars))
+               ;         (loop (cdr newDefVars)))))
+               (values `(,newExp) `(program ,vars ,type (defines ,@newDefStms) ,(append stms (list (list `return newExp)))) vars)])))
 
 (define flatten 
   (lambda (exp)
