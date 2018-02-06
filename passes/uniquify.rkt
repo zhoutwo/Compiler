@@ -39,6 +39,9 @@
                       `(has-type (vector-set! ,((uniquify-helper alist) arg1) ,((uniquify-helper alist) arg2) ,((uniquify-helper alist) arg3)) ,t)]
                     [`(read) rawExp]
                     [`(void) rawExp]
+                    [`(allocate ,rest ...) rawExp]
+                    [`(global-value ,rest ...) rawExp]
+                    [`(collect ,rest ...) rawExp]
                     [`(if ,cond ,thn ,els)
                       `(has-type (if ,((uniquify-helper alist) cond) ,((uniquify-helper alist) thn) ,((uniquify-helper alist) els)) ,t)]
                     [`(,op ,es ...)
