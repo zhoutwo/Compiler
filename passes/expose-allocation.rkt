@@ -6,7 +6,9 @@
   (lambda (e)
     (match e
            [`(program ,type ,defs ,body)
-             `(program ,type ,(map (lambda (def) (expose-allocation def)) defs) ,(expose-allocation body))]
+             `(program ,type ,(map expose-allocation defs) ,(expose-allocation body))]
+           [`(define ,info : ,rt ,body)
+             `(define ,info : ,rt ,(expose-allocation body))]
            [`(has-type (vector ,es ...) ,types) 
              (expose-allocation-helper es '() types 0 (gensym "alloc"))]
            [`(has-type (let ([,x ,exp]) ,body) ,t)

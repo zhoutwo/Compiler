@@ -7,8 +7,8 @@
     (match e
            [`(program ,maxn ,type (defines ,defs ...) ,stms)
              `(program ,maxn ,type (defines ,@(map lower-conditionals defs)) ,(lower-conditionals-stms stms))]
-           [`(define (,f) ,numParam (,maxn ,rspills) (,arg-types ,storage-types) ,stms)
-             `(define (,f) ,numParam (,maxn ,rspills) (,arg-types ,storage-types) ,(lower-conditionals-stms stms))])))
+           [`(define (,f) (,maxn ,rspills) ,stms)
+             `(define (,f) (,maxn ,rspills) ,(lower-conditionals-stms stms))])))
 
 (define lower-conditionals-stms
   (lambda (stms)

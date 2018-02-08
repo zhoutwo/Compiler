@@ -1,6 +1,5 @@
 #lang racket
 (require "../utilities.rkt")
-
 (provide build-interference)
 
 (define add-edges-helper
@@ -44,21 +43,12 @@
 (define build-interference
   (lambda (program)
     (match program
-           [`(define (,fs) ,numParams (,defvar-types ,maxStacks ,lives) (,arg-types ,storage-types) ,ees)
+          [`(define (,f) ,numParams (,defvar-types ,maxStacks ,lives) ,ees)
               (define alldefvars (map car defvar-types))
-               `(define (,fs) ,numParams (,defvar-types ,maxStacks ,(helper lives ees (make-graph alldefvars) defvar-types)) (,arg-types ,storage-types) ,ees)]
-           [`(program (,var-types ,live-afters ,type) (defines ,defs ...) ,stms)
-               (define ndefs (map build-interference defs))
-               (define def-var-types (apply append (map (lambda (def)
-                                                              (cadr (cadr (cdddr def)))) defs)))
-               (define all-var-types (append var-types def-var-types))
-               (define all-vars (set-union (map car all-var-types) (set->list caller-save)))
-               ;(define g (make-graph all-vars))
-               ;(set! g (helper live-afters stms g all-var-types))
-               ;(let loop ([lives lives]
-               ;           [ees ees])
-               ;           (if (null? lives)
-               ;               (void)
-               ;               (begin (set! g (helper (car lives) (car ees) g all-var-types))
-               ;                      (loop (cdr defvar-types) (cdr lives) (cdr ees)))))
-               `(program (,var-types ,(helper live-afters stms (make-graph all-vars) all-var-types) ,type) (defines ,@ndefs) ,stms)])))
+              (define g (make-graph alldefvars))
+               `(define (,f) ,numParams (,defvar-types ,maxStacks ,(helper lives ees g defvar-types)) ,ees)]
+          [`(program (,var-types ,live-afters ,type) (defines ,defs ...) ,maxStacks ,stms)
+              (define ndefs (map build-interference defs))
+              (define vars (map car var-types))
+              (define g (make-graph vars))
+              `(program (,var-types ,(helper live-afters stms g var-types) ,type) (defines ,@ndefs) ,maxStacks ,stms)])))

@@ -43,7 +43,7 @@
                        (set! ls (cons `(,var ,(car colors)) ls))) (car color-vars))
                (loop (cdr colors) (cdr color-vars) ls))))))
 
-(define regs '(rbx rcx rdx rsi rdi r8 r9 r10 r12 r13 r14))
+(define regs '(rbx r10 r12 r13 r14))
 
 (define vec?
   (lambda (v vtypes)
@@ -70,20 +70,19 @@
                                                  (let ([value (car (lookup var alist))])
                                                           (cond
                                                             [(< value (length regs)) `(reg ,(list-ref regs value))]
-                                                            [else `(deref rbp ,(* 16 (- value (length regs))))])))]
+                                                            [else `(deref rbp ,(* 16 (+ 1 (- value (length regs)))))])))]
                                              [else var])
                                       var)) es)) 
                      (allocate-registers-insts (cdr insts) alist var-types rspillslst))]))))
 
-
 (define allocate-registers 
   (lambda (program)
     (match program
-           [`(program (,vars ,graph ,type) (defines ,defs ...) ,stms)
+           [`(program (,vars ,graph ,type) (defines ,defs ...) ,maxStack ,stms)
              (let* ([ndefs (map allocate-registers defs)]
                     [alist (color-graph-convert (color-graph graph (map car vars)))]
-                    [max (apply max (append '(0) (map cadr alist)))]
-                    [maxn (* 16 max)]
+                    [max (* 16 (apply max (append '(0) (map cadr alist))))]
+                    [maxn (+ max maxStack)]
                     [var-types vars]
                     [vec-colors (filter (lambda (v) (vec? (car v) var-types)) alist)]
                     [colors-for-vec (sort (set->list (list->set (map cadr vec-colors))) <)]
@@ -101,10 +100,10 @@
                                         (cons `(,(car vecs) . ,(lookup (car (lookup (car vecs) alist)) color-to-spillloc))
                                           (loop (cdr vecs) rspillslst))))])
                     `(program (,maxn ,rspills) ,type (defines ,@ndefs) ,(allocate-registers-insts stms alist var-types rspillslst)))]
-           [`(define (,f) ,numParam (,defvar-types ,maxStack ,graph) (,arg-types ,storage-types) ,stms)
+           [`(define (,f) ,numParam (,defvar-types ,maxStack ,graph) ,stms)
                (let* ([alist (color-graph-convert (color-graph graph (map car defvar-types)))]
-                       ;[max (apply max (append '(0) (map cadr alist)))]
-                       [maxn (* 16 maxStack)]
+                       [fvarlength (* 16 (apply max (append '(0) (map cadr alist))))]
+                       [maxn (+ fvarlength maxStack)]
                        [var-types defvar-types]
                        [vec-colors (filter (lambda (v) (vec? (car v) var-types)) alist)]
                        [colors-for-vec (sort (set->list (list->set (map cadr vec-colors))) <)]
@@ -121,4 +120,4 @@
                                            rspillslst
                                            (cons `(,(car vecs) . ,(lookup (car (lookup (car vecs) alist)) color-to-spillloc))
                                              (loop (cdr vecs) rspillslst))))])
-                       `(define (,f) ,numParam (,maxn ,rspills) (,arg-types ,storage-types) ,(allocate-registers-insts stms alist var-types rspillslst)))])))
+                       `(define (,f) (,maxn ,rspills) ,(allocate-registers-insts stms alist var-types rspillslst)))])))

@@ -4,6 +4,7 @@
 
 (define (vars-read e)
   (match e
+    [`(indirect-callq (var ,v)) `(,v)]
     [`(addq (var ,v1) (var ,v2)) `(,v1 ,v2)]
     [`(addq (var ,v) ,rest) `(,v)]
     [`(addq ,rest (var ,v)) `(,v)]
@@ -37,6 +38,7 @@
 
 (define (vars-write e)
   (match e
+    [`(leaq ,rest (var ,v)) `(,v)]
     [`(addq ,rest (var ,v)) `(,v)]
     [`(cmpq ,rest (var ,v)) `(,v)]
     [`(eq? ,rest (var ,v)) `(,v)]
@@ -61,15 +63,15 @@
 
 (define (uncover-live-helper e ls)
   (match e
-    [`(program (,var-types ,num-vars) (type ,t) (defines ,defs ...) ,es)
+    [`(program (,var-types ,num-vars) (type ,t) (defines ,defs ...) ,maxStacks ,es)
         (begin
           (define-values (lives ees) (uncover-live-helper es ls))
           (define-values (deflives defees) (map2 (lambda (def) (uncover-live-helper def ls)) defs))
-          `(program (,var-types ,(cdr lives) (type ,t)) (defines ,@defees) ,(reverse ees)))]
-    [`(define (,f) ,numParams (,var ,maxStack) (,arg-types ,storage-types) ,instrs)
+          `(program (,var-types ,(cdr lives) (type ,t)) (defines ,@defees) ,maxStacks ,(reverse ees)))]
+    [`(define (,f) ,numParams (,vars ... ,maxStack) ,instrs)
         (begin
           (define-values (lives ees) (uncover-live-helper instrs ls))
-          (values (cdr lives) `(define (,f) ,numParams (,var ,maxStack ,(cdr lives)) (,arg-types ,storage-types) ,(reverse ees))))]
+          (values (cdr lives) `(define (,f) ,numParams (,vars ,maxStack ,(cdr lives)) ,(reverse ees))))]
     [else
       (let loop ([es (reverse e)]
                  [ls ls])

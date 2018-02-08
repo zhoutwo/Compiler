@@ -33,5 +33,5 @@
     (match p
            [`(program ,maxn ,type (defines ,defs ...) ,stms)
               `(program ,maxn ,type (defines ,@(map patch-instructions defs)) ,(apply append (map patch-instructions-stms stms)))]
-           [`(define (,f) ,numParam (,maxn ,rspills) (,arg-types ,storage-types) ,stms)
-              `(define (,f) ,numParam (,maxn ,rspills) (,arg-types ,storage-types) ,(apply append (map patch-instructions-stms stms)))])))
+           [`(define (,f) (,maxn ,rspills) ,stms)
+              `(define (,f) (,maxn ,rspills) ,(apply append (map patch-instructions-stms stms)))])))

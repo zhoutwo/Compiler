@@ -3,14 +3,14 @@
 (require (for-syntax racket))
 (provide debug-level debug verbose vomit
          map2 map3 b2i i2b
-         fix while make-list
+         fix while make-list sanitized-label
          label-name lookup  make-dispatcher assert
          read-fixnum read-program 
-	 compile compile-file check-passes interp-tests compiler-tests
-	 interp-test-suite compiler-test-suite
-	 make-graph add-edge adjacent vertices print-dot
-	 general-registers registers-for-alloc caller-save callee-save
-	 arg-registers register->color registers align
+         compile compile-file check-passes interp-tests compiler-tests
+         interp-test-suite compiler-test-suite
+         make-graph add-edge adjacent vertices print-dot
+         general-registers registers-for-alloc caller-save callee-save
+         arg-registers register->color registers align
          byte-reg->full-reg print-by-type view-has-type)
 
 (define make-list
@@ -680,6 +680,8 @@
       (error 'byte-reg->full-reg "invalid byte register ~a" x))
     r?))
 
+(define (sanitized-label l)
+  (string-replace (symbol->string l) "-" "_"))
 
 (define reg-colors
   '((rax . -1) (__flag . -1)

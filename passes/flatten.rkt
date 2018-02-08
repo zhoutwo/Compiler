@@ -91,13 +91,6 @@
                (define-values (newExp stms vars) (flatten-helper e))
                (set! vars (remove-duplicates vars))
                (define-values (newDefExps newDefStms newDefVars) (map3 flatten-helper defs))
-               ;(let loop ([defVars newDefVars])
-               ;   (if (null? defVars)
-               ;       (void)
-               ;       (begin
-               ;         (define newVars (set-union (list->set vars) (list->set (car defVars))))
-               ;         (set! vars (set->list newVars))
-               ;         (loop (cdr newDefVars)))))
                (values `(,newExp) `(program ,vars ,type (defines ,@newDefStms) ,(append stms (list (list `return newExp)))) vars)])))
 
 (define flatten 
