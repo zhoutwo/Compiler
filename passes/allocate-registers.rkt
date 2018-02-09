@@ -70,7 +70,7 @@
                                                  (let ([value (car (lookup var alist))])
                                                           (cond
                                                             [(< value (length regs)) `(reg ,(list-ref regs value))]
-                                                            [else `(deref rbp ,(* 16 (+ 1 (- value (length regs)))))])))]
+                                                            [else `(deref rbp ,(- (* 16 (+ 1 (- value (length regs))))))])))]
                                              [else var])
                                       var)) es)) 
                      (allocate-registers-insts (cdr insts) alist var-types rspillslst))]))))

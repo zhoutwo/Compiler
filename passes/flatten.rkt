@@ -52,6 +52,13 @@
                                 (cons (cons newExp t) (append prev-vars thn-vars els-vars))))]
                     [`(and ,exp1 ,exp2)
                       (flatten-helper `(has-type (if ,exp1 ,exp2 (has-type #f Boolean)) Boolean))]
+                    [`(app ,op ,exps ...)
+                        (define-values (opExp opStms opVars) (flatten-helper op))
+                        (define-values (eExps eStms eVars) (map3 flatten-helper exps))
+                        (let ([newExp (gensym "app")])
+                          (values newExp
+                            `(,@opStms ,@(apply append eStms) (assign ,newExp (app ,opExp ,@eExps)))
+                            `(,(cons newExp t) ,@opVars ,@(apply append eVars))))]
                     [`(,op ,exp)
                       (let ([newExp (gensym "tmp")])
                         (define-values (prevExp stms vars) (flatten-helper exp))
@@ -74,14 +81,7 @@
                         (define-values (prevExp3 stms3 vars3) (flatten-helper exp3))
                         (values newExp 
                                 (append stms1 stms2 stms3 (list (list `assign newExp `(,op ,prevExp1 ,prevExp2 ,prevExp3)))) 
-                                (cons (cons newExp t) (append vars1 vars2 vars3))))]
-                    [`(app ,op ,exps ...)
-                        (define-values (opExp opStms opVars) (flatten-helper op))
-                        (define-values (eExps eStms eVars) (map3 flatten-helper exps))
-                        (let ([newExp (gensym "app")])
-                          (values newExp
-                            `(,@opStms ,@(apply append eStms) (assign ,newExp (app ,opExp ,@eExps)))
-                            `(,(cons newExp t) ,@opVars ,@(apply append eVars))))])]
+                                (cons (cons newExp t) (append vars1 vars2 vars3))))])]
            [`(define (,f [,xs : ,ps] ...) : ,rt ,body)
                (define-values (newExp stms vars) (flatten-helper body))
                (set! vars (remove-duplicates vars))

@@ -13,6 +13,8 @@
              (expose-allocation-helper es '() types 0 (gensym "alloc"))]
            [`(has-type (let ([,x ,exp]) ,body) ,t)
              `(has-type (let ([,x ,(expose-allocation exp)]) ,(expose-allocation body)) ,t)]
+           [`(has-type (app ,op ,es ...) ,ts)
+                        `(has-type (app ,(expose-allocation op) ,@(map expose-allocation es)) ,ts)]
            [`(has-type (,op ,e1 ,e2) ,ts)
              `(has-type (,op ,(expose-allocation e1) ,(expose-allocation e2)) ,ts)]
            [`(has-type (,op ,e1) ,ts)
