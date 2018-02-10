@@ -17,6 +17,8 @@
                            rawExp)]
           [(? integer?) rawExp]
           [(? boolean?) rawExp]
+          [`(lambda: ([,xs : ,ps] ...) : ,rt ,body)
+              `(has-type (lambda: ,(cadr e) : ,rt ,((reveal-functions-helper fnames) body)) ,t)]
           [`(let ([,x ,e]) ,body)
               `(has-type (let ([,((reveal-functions-helper fnames) x) ,((reveal-functions-helper fnames) e)])
                               ,((reveal-functions-helper fnames) body)) ,t)]
@@ -61,4 +63,4 @@
     (match e
        [`(program ,type ,defs ,e)
          (define fnames (map caadr defs))
-         `(program ,type (defines ,@(map (reveal-functions-helper fnames) defs)) ,((reveal-functions-helper fnames) e))])))
+           `(program ,type (defines ,@(map (reveal-functions-helper fnames) defs)) ,((reveal-functions-helper fnames) e))])))

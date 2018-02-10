@@ -11,10 +11,10 @@
            [`(lambda: ([,xs : ,Ts] ...) : ,rT ,body)
                (define new-env (append (map cons xs Ts) env))
                (define-values (newbody bodyT) ((type-check-R5 new-env) body))
-               (define newe (cons (car e) (cons (cadr e) (cons (caddr e) (cons (cadddr e) newbody)))))
+               (define newe (cons (car e) (cons (cadr e) (cons (caddr e) (cons (cadddr e) (list newbody))))))
                (cond
                  [(equal? rT bodyT)
-                     (values `(has-type newe (,@Ts -> ,rT)) `(,@Ts -> ,rT))]
+                     (values `(has-type ,newe (,@Ts -> ,rT)) `(,@Ts -> ,rT))]
                  [else (error "mismatch in return type" bodyT rT)])]
            [`(define (,f [,xs : ,ps] ...) : ,rt ,body)
               (define newenv (let loop ([xs xs]

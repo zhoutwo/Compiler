@@ -42,24 +42,31 @@
                     [`(allocate ,rest ...) rawExp]
                     [`(global-value ,rest ...) rawExp]
                     [`(collect ,rest ...) rawExp]
+                    [`(lambda: ([,xs : ,ps] ...) : ,rt ,body)
+                         (map (lambda (x)
+                                (set! alist (cons (cons x (gensym x)) alist))) xs)
+                         (define newbody ((uniquify-helper alist) body))
+                         (define new-xs-ps (map (lambda (x p)
+                                                    `(,(lookup x alist) : ,p)) xs ps))
+                         `(has-type (lambda: ,new-xs-ps : ,rt ,newbody) ,t)]
                     [`(if ,cond ,thn ,els)
                       `(has-type (if ,((uniquify-helper alist) cond) ,((uniquify-helper alist) thn) ,((uniquify-helper alist) els)) ,t)]
                     [`(,op ,es ...)
                       `(has-type (,((uniquify-helper alist) op) ,@(map (uniquify-helper alist) es)) ,t)])]
            [`(define (,f [,xs : ,ps] ...) : ,rt ,body)
-             (define newf (lookup f alist))
-             (map (lambda (x)
-                    (set! alist (cons (cons x (gensym x)) alist))) xs)
-             (define newbody ((uniquify-helper alist) body))
-             (define new-xs-ps (map (lambda (x p)
-                                        `(,(lookup x alist) : ,p)) xs ps))
-             `(define (,newf ,@new-xs-ps) : ,rt ,newbody)]
+               (define newf (lookup f alist))
+               (map (lambda (x)
+                      (set! alist (cons (cons x (gensym x)) alist))) xs)
+               (define newbody ((uniquify-helper alist) body))
+               (define new-xs-ps (map (lambda (x p)
+                                          `(,(lookup x alist) : ,p)) xs ps))
+               `(define (,newf ,@new-xs-ps) : ,rt ,newbody)]
            [`(program ,type ,defs ,e)
-             (define fnames (map caadr defs))
-             (map (lambda (fname)
-                    (set! alist (cons (cons fname (gensym fname)) alist))) fnames)
-             `(program ,type ,(map (uniquify-helper alist) defs) ,((uniquify-helper alist) e))]
-           )))
+               (define fnames (map caadr defs))
+               (map (lambda (fname)
+                      (set! alist (cons (cons fname (gensym fname)) alist))) fnames)
+               `(program ,type ,(map (uniquify-helper alist) defs) ,((uniquify-helper alist) e))]
+             )))
 
 (define uniquify
   (lambda (e)
