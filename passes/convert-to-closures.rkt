@@ -42,6 +42,7 @@
               (define-values (newE eLambdas eFrees) ((convert-to-closures-helper boundeds) e))
               (define new-boundeds (cons (cons x (get-type-from-has-type e)) boundeds))
               (define-values (newBody bodyLambdas bodyFrees) ((convert-to-closures-helper new-boundeds) body))
+              (set! bodyFrees (set-subtract bodyFrees new-boundeds))
               (values `(has-type (let ([,x ,newE])
                               ,newBody) ,t) (append eLambdas bodyLambdas) (append eFrees bodyFrees))]
           [`(+ ,arg1 ,arg2)
@@ -125,6 +126,7 @@
           (define Ts (map cons xs ps))
           (define new-boundeds (append Ts boundeds))
           (define-values (newBody bodyLambdas bodyFrees) ((convert-to-closures-helper new-boundeds) body))
+          (set! bodyFrees (set-subtract bodyFrees new-boundeds))
           (define closureType `(Vector (,@ps -> ,rt)))
           (values `(define (,f [clos : ,closureType] ,@(cdadr rawExp)) : ,rt ,newBody) bodyLambdas bodyFrees)])))
 

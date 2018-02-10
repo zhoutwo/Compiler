@@ -34,6 +34,26 @@
             (string-append "\tpopq " (print-x86-arg `(reg ,(car regs))) "\n" (loop (cdr regs)))))
       (string-append (if mac? "_" "") (symbol->string (gensym "done_restoring_caller")) ":\n"))))
 
+(define print-save-general
+  (lambda ()
+    (string-append
+      (string-append (if mac? "_" "") (symbol->string (gensym "saving_general")) ":\n")
+      (let loop ([regs (vector->list general-registers)])
+        (if (null? regs)
+            ""
+            (string-append "\tpushq " (print-x86-arg `(reg ,(car regs))) "\n" (loop (cdr regs)))))
+      (string-append (if mac? "_" "") (symbol->string (gensym "done_saving_general")) ":\n"))))
+
+(define print-restore-general
+  (lambda ()
+    (string-append
+      (string-append (if mac? "_" "") (symbol->string (gensym "restoring_general")) ":\n")
+      (let loop ([regs (reverse (vector->list general-registers))])
+        (if (null? regs)
+            ""
+            (string-append "\tpopq " (print-x86-arg `(reg ,(car regs))) "\n" (loop (cdr regs)))))
+      (string-append (if mac? "_" "") (symbol->string (gensym "done_restoring_general")) ":\n"))))
+
 (define print-save-callee-save
   (lambda ()
     (string-append
@@ -91,14 +111,18 @@
             (if mac? "_" "") (sanitized-label label) ":\n"
             "\tpushq %rbp\n"
             "\tmovq %rsp, %rbp" "\n"
-            (print-save-callee-save)
+            ;(print-save-caller-save)
+            ;(print-save-callee-save)
+            (print-save-general)
             (if (< 0 size) (string-append "\tsubq $" (number->string size) ", %rsp" "\n") "")
             "\tmovq $0, (%r15)" "\n"
             "\taddq $" (number->string rspills) ", %r15" "\n"
             (string-append* (map print-common stms))
             "\tsubq $" (number->string rspills) ", %r15" "\n"
             (if (< 0 size) (string-append  "\taddq $" (number->string size) ", %rsp" "\n") "")
-            (print-restore-callee-save)
+            ;(print-restore-callee-save)
+            ;(print-restore-caller-save)
+            (print-restore-general)
             "\tpopq %rbp\n"
             "\tretq" "\n\n")]
       [`(program (,size ,rspills) (type ,type) (defines ,defs ...) ,stms)

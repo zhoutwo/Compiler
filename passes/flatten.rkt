@@ -7,7 +7,7 @@
     (match rawExp
            [`(has-type ,exp ,t)
              (match exp
-                    [(? symbol?) (values exp null null)]
+                    [(? symbol?) (values exp null `(,(cons exp t)))]
                     [(? integer?) (values exp null null)]
                     [(? boolean?) (values exp null null)]
                     [`(function-ref ,fref)
@@ -84,6 +84,7 @@
                                 (cons (cons newExp t) (append vars1 vars2 vars3))))])]
            [`(define (,f [,xs : ,ps] ...) : ,rt ,body)
                (define-values (newExp stms vars) (flatten-helper body))
+               ;(set! vars (append (map cons xs ps) vars))
                (set! vars (remove-duplicates vars))
                (define newStms `(define ,(cadr rawExp) : ,(cadddr rawExp) ,vars (,@stms (return ,newExp))))
                (values `(,newExp) newStms vars)]

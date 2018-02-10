@@ -14,5 +14,5 @@
 (compiler-tests "compiler.rkt" type-check r5-passes "r3" (make-list 35))
 (compiler-tests "compiler.rkt" type-check r5-passes "r4" (make-list 38))
 ;(compiler-tests "compiler.rkt" type-check r5-passes "r5" (make-list 12))
-(compiler-tests "compiler.rkt" type-check r5-passes "r5" (list 1 2 3 4 5 7 8 10 11 12))
+(compiler-tests "compiler.rkt" type-check r5-passes "r5" (list 1 2 3 4 5 6 7 8 10 11 12))
 (newline) (display "tests passed!") (newline)

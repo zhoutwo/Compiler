@@ -43,7 +43,7 @@
                        (set! ls (cons `(,var ,(car colors)) ls))) (car color-vars))
                (loop (cdr colors) (cdr color-vars) ls))))))
 
-(define regs '(rbx r10 r12 r13 r14))
+(define regs null);'(rbx r10 r12 r13 r14))
 
 (define vec?
   (lambda (v vtypes)
