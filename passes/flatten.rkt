@@ -52,6 +52,14 @@
                                 (cons (cons newExp t) (append prev-vars thn-vars els-vars))))]
                     [`(and ,exp1 ,exp2)
                       (flatten-helper `(has-type (if ,exp1 ,exp2 (has-type #f Boolean)) Boolean))]
+                    [`(set! ,exp1 ,exp2)
+                      (let ([newExp (gensym "tmp")])
+                        (define-values (prevExp1 stms1 vars1) (flatten-helper exp1))
+                        (define-values (prevExp2 stms2 vars2) (flatten-helper exp2))
+                        (values newExp
+                                (append stms1 stms2 (list `(assign ,prevExp1 ,prevExp2) (list `assign newExp `(void))))
+                                (cons (cons newExp t) (append vars1 vars2))))
+                      ]
                     [`(app ,op ,exps ...)
                         (define-values (opExp opStms opVars) (flatten-helper op))
                         (define-values (eExps eStms eVars) (map3 flatten-helper exps))

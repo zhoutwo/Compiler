@@ -55,6 +55,16 @@
              (if (equal? 'Integer t)
                (values `(has-type (- ,e) Integer) 'Integer)
                (error 'type-check-R5 "`-` expects an Integers: ~a" e))]
+           [`(set! ,(app (type-check-R5 env) e1 t1) ,(app (type-check-R5 env) e2 t2))
+               ;(define new-env (let loop ([env env]
+               ;                            [new-env '()])
+               ;                            (cond
+               ;                              [(null? env) new-env]
+               ;                              [(equal? (caar env) e1) (cons (cons e1 t2) env)]
+               ;                              [else (cons (car env) (loop (cdr env) new-env))])))
+             (if (equal? t1 t2)
+               (values `(has-type (set! ,e1 ,e2) Void) 'Void)
+               (error 'type-check-R5 "'set!' expects two args to have the same types: ~a" e))]
            [`(+ ,(app (type-check-R5 env) e1 t1) ,(app (type-check-R5 env) e2 t2))
              (if (and (equal? 'Integer t1) (equal? 'Integer t2))
                (values `(has-type (+ ,e1 ,e2) Integer) 'Integer)

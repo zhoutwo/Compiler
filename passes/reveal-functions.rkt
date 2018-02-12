@@ -22,6 +22,8 @@
           [`(let ([,x ,e]) ,body)
               `(has-type (let ([,((reveal-functions-helper fnames) x) ,((reveal-functions-helper fnames) e)])
                               ,((reveal-functions-helper fnames) body)) ,t)]
+          [`(set! ,arg1 ,arg2)
+            `(has-type (set! ,((reveal-functions-helper fnames) arg1) ,((reveal-functions-helper fnames) arg2)) ,t)]
           [`(+ ,arg1 ,arg2)
             `(has-type (+ ,((reveal-functions-helper fnames) arg1) ,((reveal-functions-helper fnames) arg2)) ,t)]
           [`(- ,arg1)

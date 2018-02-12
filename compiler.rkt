@@ -1,7 +1,7 @@
 #lang racket
 (require "utilities.rkt")
 (require "interp.rkt")
-(provide r5-passes)
+(provide r6-passes)
 
 (require "passes/type-check.rkt")
 (require "passes/uniquify.rkt")
@@ -35,7 +35,7 @@
   (lambda (e)
     (build-interference (uncover-live (select-instructions (flatten (expose-allocation (uniquify (type-check e)))))))))
 
-(define r5-passes
+(define r6-passes
   `(("uniquify" ,uniquify ,null)
     ("expose-allocation" ,expose-allocation ,null)
     ("reveal-functions" ,reveal-functions ,null)

@@ -13,6 +13,8 @@
                     [`(let ([,x ,e]) ,body) 
                       (let ([newsym (gensym x)])
                         `(has-type (let ([,newsym ,((uniquify-helper alist) e)]) ,((uniquify-helper (cons (cons x newsym) alist)) body)) ,t))]
+                    [`(set! ,arg1 ,arg2)
+                      `(has-type (set! ,((uniquify-helper alist) arg1) ,((uniquify-helper alist) arg2)) ,t)]
                     [`(+ ,arg1 ,arg2)
                       `(has-type (+ ,((uniquify-helper alist) arg1) ,((uniquify-helper alist) arg2)) ,t)]
                     [`(- ,arg1)
