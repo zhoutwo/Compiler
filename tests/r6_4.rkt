@@ -1,4 +1,4 @@
-(define-syntax (add a b)
+(define-syntax (add a b) []
   (+ a b))
 
 (define (addd [a : Integer] [b : Integer]) : Integer

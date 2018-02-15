@@ -9,6 +9,6 @@
 
 (define (parse-syntaxes-helper e)
   (match e
-    [`(define-syntax (,syn ,args ...) ,body)
+    [`(define-syntax (,syn ,args ...) ,special ,body)
         ; `(syntax name argmapping bodymapping)
         `(syntax ,syn ,(cons syn args) ,(cons syn body))]))
