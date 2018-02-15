@@ -1,4 +1,7 @@
 #lang racket
+(require "parse-syntaxes.rkt")
+(require "expand-syntaxes.rkt")
+(require "strip-timestamps.rkt")
 (require "../utilities.rkt")
 (provide type-check)
 
@@ -161,9 +164,9 @@
            [`(,op ,(app (type-check-R5 env) e1 t1) ,(app (type-check-R5 env) e2 t2))
              (if (and (eq? 'Integer t1) (eq? 'Integer t2))
                (values `(has-type (,op ,e1 ,e2) `Boolean) 'Boolean)
-               (error `type-check-R5 (string-append (symbol->string op) " expects two Integers: ~a ~a ~a") e t1 t2))]
-           )))
+               (error `type-check-R5 (string-append (symbol->string op) " expects two Integers: ~a ~a ~a") e t1 t2))])))
 
 (define type-check
   (lambda (e)
-  ((type-check-R5 '()) e)))
+    (define expandedE (strip-timestamps (expand-syntaxes (parse-syntaxes e))))
+    ((type-check-R5 '()) expandedE)))
