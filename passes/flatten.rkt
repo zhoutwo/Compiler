@@ -102,7 +102,7 @@
                (define-values (newDefExps newDefStms newDefVars) (map3 flatten-helper defs))
                (values `(,newExp) `(program ,vars ,type (defines ,@newDefStms) ,(append stms (list (list `return newExp)))) vars)])))
 
-(define flatten 
+(define flatten
   (lambda (exp)
     (define-values (tmp stms vars) (flatten-helper exp))
     stms))
