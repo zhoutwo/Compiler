@@ -23,8 +23,9 @@
 (define (expand-syntaxes-helper syns time)
   (lambda (e)
     (define synnames (map cadr syns))
-    (define argmapping (map caddr syns))
-    (define bodymapping (map cadddr syns))
+    (define specialmapping (map caddr syns))
+    (define argmapping (map cadddr syns))
+    (define bodymapping (map (lambda (syn) (cadr (cdddr syn))) syns))
     (match e
         [(? fixnum?) (values e #f)]
         [(? boolean?) (values e #f)]
@@ -77,12 +78,15 @@
         [`(,op ,exps ...)
             (if (and (symbol? op) (member op synnames))
                 (let ([synargs (lookup op argmapping)] ; Macro
-                      [synbody (lookup op bodymapping)])
+                      [synbody (lookup op bodymapping)]
+                      [specials (lookup op specialmapping)])
                   (if (not (equal? (length exps) (length synargs)))
                       (error `expand-syntaxes-helper "number of syntax args don't match: ~a, ~a" exps synargs)
                       (let-values ([(es ts) (map2 (expand-syntaxes-helper syns time) exps)])
                         (define synarg-arg-map (map cons synargs es))
-                        (values ((replace-symbols synarg-arg-map) synbody) #t))))
+                        (define special-arg-map (map (lambda (s) (cons s (box (cons s time)))) specials))
+                        (define total-arg-map (append synarg-arg-map special-arg-map))
+                        (values ((replace-symbols total-arg-map) synbody) #t))))
                 (let-values ([(newop opexpanded) ((expand-syntaxes-helper syns time) op)]
                              [(es ts) (map2 (expand-syntaxes-helper syns time) exps)]) ; Non-macro
                     (values `(,newop ,@es) (or opexpanded (ormap (lambda (a) a) ts)))))])))
